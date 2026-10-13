@@ -35,7 +35,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 SUBJECTS_FILE = SCRIPT_DIR / "subjects.json"
 
-EXTENSIONS = {".json", ".png", ".jpg", ".jpeg", ".webp", ".gif"}
+EXTENSIONS = {".json", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}
 
 # [batch-]<код>-[batch-]<номер>, например res-batch-11, batch-imm-002, res-147
 NAME_RE = re.compile(r"^(?:batch[-_ ]?)?([a-z]+)[-_ ](?:batch[-_ ]?)?(\d+)$", re.IGNORECASE)
