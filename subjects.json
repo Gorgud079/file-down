@@ -27,5 +27,8 @@
   "eth": "Ethics",
   "stat": "Biostatistics",
   "anat": "Anatomy",
+  "emb": "Embryology",
+  "embryo": "Embryology",
+  "tox": "Toxicology",
   "phys": "Physiology"
 }

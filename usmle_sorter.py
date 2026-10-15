@@ -61,10 +61,16 @@ def default_downloads():
 def load_subjects():
     try:
         with open(SUBJECTS_FILE, encoding="utf-8") as f:
-            return {k.lower(): v for k, v in json.load(f).items()}
+            subjects = {k.lower(): v for k, v in json.load(f).items()}
     except FileNotFoundError:
         print(f"Не найден {SUBJECTS_FILE}, предметы будут называться по коду.")
         return {}
+    # Полное название папки тоже работает как код: toxicology_011.json -> Toxicology
+    for name in set(subjects.values()):
+        subjects.setdefault(name.lower(), name)
+    return subjects
+
+
 
 
 def subject_code(path):
@@ -80,12 +86,19 @@ def subject_code(path):
 
 
 def parse_name(path):
-    """res-batch-11.json -> ('res-batch', 'res-batch-', 11, '11'); None, если имя не по схеме."""
+    """res-batch-11.json -> ('res-batch', 'res-batch-', [11], '11'); None, если имя не по схеме."""
     m = NAME_RE.match(path.stem)
     if not m:
         return None
     prefix = path.stem[:m.start(2)].lower()
-    return prefix.rstrip("-_ "), prefix, int(m.group(2)), m.group(2)
+    first = int(m.group(2))
+    numbers = [first]
+    # toxicology_011-025 — файл с задачами 11–25
+    rng = re.match(r"-(\d+)$", path.stem[m.end(2):])
+    if rng and first < int(rng.group(1)) <= first + 1000:
+        numbers = list(range(first, int(rng.group(1)) + 1))
+        return prefix.rstrip("-_ "), prefix, numbers, rng.group(1)
+    return prefix.rstrip("-_ "), prefix, numbers, m.group(2)
 
 
 def natural_key(path):
@@ -125,11 +138,11 @@ def build_library(archive):
                 parsed = parse_name(f)
                 if not parsed:
                     continue
-                name, prefix, num, digits = parsed
+                name, prefix, nums, digits = parsed
                 info = series.setdefault(name, {"subject": subject_dir.name, "prefix": prefix,
                                                  "numbers": set(),
                                                  "width": 0, "kinds": set(), "files": 0})
-                info["numbers"].add(num)
+                info["numbers"].update(nums)
                 info["width"] = max(info["width"], len(digits))
                 info["kinds"].add("json" if f.suffix.lower() == ".json" else "картинки")
                 info["files"] += 1

@@ -155,10 +155,14 @@ python "%~dp0usmle_sorter.py" --archive "D:\Учёба\USMLE" %*
 | `res-147 (1).png`    | `res` | Respiratory (сохранится как `res-147.png`) |
 | `neu-001.png`        | `neu` | Neurology |
 | `pha_002_x7k21s309.png` | `pha` | Pharmacology |
+| `emb_001_9di3vk17tk.png` | `emb` | Embryology |
+| `toxicology_011-025.json` | `toxicology` | Toxicology (в библиотеке займёт номера 11–25) |
 
 После номера может идти «хвост» из случайных символов (`_x7k21s309`) — он
 сохраняется в имени файла, а предмет и номер определяются по началу.
 Разделителем может быть `-` или `_`.
+Вместо короткого кода можно писать полное название предмета из `subjects.json`
+(`toxicology`, `Pharmacology`) — оно тоже распознаётся.
 
 Все остальные файлы в «Загрузках» **не трогаются**.
 
