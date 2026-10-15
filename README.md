@@ -153,6 +153,12 @@ python "%~dp0usmle_sorter.py" --archive "D:\Учёба\USMLE" %*
 | `res-147.png`        | `res` | Respiratory |
 | `res-147.svg`        | `res` | Respiratory |
 | `res-147 (1).png`    | `res` | Respiratory (сохранится как `res-147.png`) |
+| `neu-001.png`        | `neu` | Neurology |
+| `pha_002_x7k21s309.png` | `pha` | Pharmacology |
+
+После номера может идти «хвост» из случайных символов (`_x7k21s309`) — он
+сохраняется в имени файла, а предмет и номер определяются по началу.
+Разделителем может быть `-` или `_`.
 
 Все остальные файлы в «Загрузках» **не трогаются**.
 

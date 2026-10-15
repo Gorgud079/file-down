@@ -42,8 +42,10 @@ LIBRARY_NAME = "USMLE_library.md"
 
 EXTENSIONS = {".json", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}
 
-# [batch-]<код>-[batch-]<номер>, например res-batch-11, batch-imm-002, res-147
-NAME_RE = re.compile(r"^(?:batch[-_ ]?)?([a-z]+)[-_ ](?:batch[-_ ]?)?(\d+)$", re.IGNORECASE)
+# [batch-]<код>-[batch-]<номер>[_хвост], например res-batch-11, batch-imm-002,
+# res-147, pha_002_x7k21s309 (хвост после номера — случайные символы от Claude)
+NAME_RE = re.compile(r"^(?:batch[-_ ]?)?([a-z]+)[-_ ](?:batch[-_ ]?)?(\d+)(?:[-_ .][\w.-]*)?$",
+                     re.IGNORECASE)
 # Хвост, который браузер добавляет к повторным загрузкам: "res-147 (1)"
 COPY_SUFFIX_RE = re.compile(r"\s*\(\d+\)$")
 
@@ -78,12 +80,12 @@ def subject_code(path):
 
 
 def parse_name(path):
-    """res-batch-11.json -> ('res-batch', 11, '11'); None, если имя не по схеме."""
+    """res-batch-11.json -> ('res-batch', 'res-batch-', 11, '11'); None, если имя не по схеме."""
     m = NAME_RE.match(path.stem)
     if not m:
         return None
-    series = path.stem[:m.start(2)].rstrip("-_ ").lower()
-    return series, int(m.group(2)), m.group(2)
+    prefix = path.stem[:m.start(2)].lower()
+    return prefix.rstrip("-_ "), prefix, int(m.group(2)), m.group(2)
 
 
 def natural_key(path):
@@ -109,7 +111,7 @@ def compress_ranges(numbers):
 def build_library(archive):
     """Пересобирает USMLE_library.md по текущему содержимому архива."""
     folders = {}   # предмет -> месяц -> [файлы]
-    series = {}    # серия -> {"subject", "numbers", "width", "kinds", "files"}
+    series = {}    # серия -> {"subject", "prefix", "numbers", "width", "kinds", "files"}
     total = 0
 
     for subject_dir in sorted(d for d in archive.iterdir() if d.is_dir()):
@@ -123,8 +125,9 @@ def build_library(archive):
                 parsed = parse_name(f)
                 if not parsed:
                     continue
-                name, num, digits = parsed
-                info = series.setdefault(name, {"subject": subject_dir.name, "numbers": set(),
+                name, prefix, num, digits = parsed
+                info = series.setdefault(name, {"subject": subject_dir.name, "prefix": prefix,
+                                                 "numbers": set(),
                                                  "width": 0, "kinds": set(), "files": 0})
                 info["numbers"].add(num)
                 info["width"] = max(info["width"], len(digits))
@@ -149,7 +152,7 @@ def build_library(archive):
         info = series[name]
         nxt = str(max(info["numbers"]) + 1).zfill(info["width"])
         lines.append(f"| {name} | {info['subject']} | {', '.join(sorted(info['kinds']))} "
-                     f"| {compress_ranges(info['numbers'])} | {info['files']} | {name}-{nxt} |")
+                     f"| {compress_ranges(info['numbers'])} | {info['files']} | {info['prefix']}{nxt} |")
     if not series:
         lines.append("| — | — | — | — | 0 | — |")
 
